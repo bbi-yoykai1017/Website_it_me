@@ -1,8 +1,19 @@
+<?php
+include 'database.php';
+$sql = new Database();
+$books = $sql->query("SELECT b.*, a.name as author_name 
+                                         FROM books b 
+                                         JOIN authors a ON b.author_id = a.id 
+                                         WHERE b.featured = 1 
+                                         ORDER BY b.id DESC LIMIT 4");
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-	<title>BookSaw - Free Book Store HTML CSS Template</title>
+	<title>BookSaw</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -92,14 +103,14 @@
 
 										<ul>
 											<li class="active"><a href="index.html">Home</a></li>
-											<li><a href="index.html">About</a></li>
-											<li><a href="index.html">Styles</a></li>
-											<li><a href="index.html">Blog</a></li>
-											<li><a href="index.html">Post Single</a></li>
-											<li><a href="index.html">Our Store</a></li>
-											<li><a href="index.html">Product Single</a></li>
-											<li><a href="index.html">Contact</a></li>
-											<li><a href="index.html">Thank You</a></li>
+											<li><a href="index.php">About</a></li>
+											<li><a href="index.php">Styles</a></li>
+											<li><a href="index.php">Blog</a></li>
+											<li><a href="index.php">Post Single</a></li>
+											<li><a href="index.php">Our Store</a></li>
+											<li><a href="index.php">Product Single</a></li>
+											<li><a href="index.php">Contact</a></li>
+											<li><a href="index.php">Thank You</a></li>
 										</ul>
 									</li>
 									<li class="menu-item"><a href="#featured-books" class="nav-link">Featured</a></li>
@@ -195,64 +206,56 @@
 		</div>
 	</section>
 
-<section id="featured-books" class="py-5 my-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="section-header align-center">
-                        <div class="title"><span>Some quality items</span></div>
-                        <h2 class="section-title">Featured Books</h2>
-                    </div>
+	<section id="featured-books" class="py-5 my-5">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="section-header align-center">
+						<div class="title"><span>Some quality items</span></div>
+						<h2 class="section-title">Featured Books</h2>
+					</div>
 
-                    <div class="product-list" data-aos="fade-up">
-                        <div class="row">
-                            <?php
-                            include 'database.php';
-                            $sql = new Database();
-                            $books = $sql->query("SELECT b.*, a.name as author_name 
-                                         FROM books b 
-                                         JOIN authors a ON b.author_id = a.id 
-                                         WHERE b.featured = 1 
-                                         ORDER BY b.id DESC LIMIT 4");
-                            foreach ($books as $book) { ?>
-                                <div class="col-md-3 mb-4">
-                                    <div class="product-item">
-                                        <figure class="product-style">
-                                            <img src="./images/<?= htmlspecialchars($book["cover_image"]) ?>.jpg"
-                                                alt="Books" class="product-item">
-                                            <form action="cart.php" method="post">
-                                                <input type="hidden" name="book_id"
-                                                    value="<?= htmlspecialchars($book['id']) ?>">
-                                                <button type="submit" name="add_to_cart" class="add-to-cart">
-                                                    Add to Cart
-                                                </button>
-                                            </form>
-                                        </figure>
-                                        <figcaption>
-                                            <h3><?= htmlspecialchars($book['title']) ?></h3>
-                                            <span><?= htmlspecialchars($book['author_name']) ?></span>
-                                            <div class="item-price">
-                                                <?php if ($book['old_price'] > 0): ?>
-                                                    <span class="prev-price">$
-                                                        <?= number_format($book['old_price'], 2) ?></span>
-                                                <?php endif; ?>
-                                                $ <?= number_format($book['price'], 2) ?>
-                                            </div>
-                                        </figcaption>
-                                    </div>
-                                </div>
-                            <?php } ?>
-                        </div>
-                    </div>
+					<div class="product-list" data-aos="fade-up">
+						<div class="row">
+							<?php foreach ($books as $book) { ?>
+								<div class="col-md-3 mb-4">
+									<div class="product-item">
+										<figure class="product-style">
+											<img src="./images/<?= htmlspecialchars($book["cover_image"]) ?>.jpg"
+												alt="Books" class="product-item">
+											<form action="cart.php" method="post">
+												<input type="hidden" name="book_id"
+													value="<?= htmlspecialchars($book['id']) ?>">
+												<button type="submit" name="add_to_cart" class="add-to-cart">
+													Add to Cart
+												</button>
+											</form>
+										</figure>
+										<figcaption>
+											<h3><?= htmlspecialchars($book['title']) ?></h3>
+											<span><?= htmlspecialchars($book['author_name']) ?></span>
+											<div class="item-price">
+												<?php if ($book['old_price'] > 0): ?>
+													<span class="prev-price">$
+														<?= number_format($book['old_price'], 2) ?></span>
+												<?php endif; ?>
+												$ <?= number_format($book['price'], 2) ?>
+											</div>
+										</figcaption>
+									</div>
+								</div>
+							<?php } ?>
+						</div>
+					</div>
 
-                    <div class="btn-wrap align-right mt-4">
-                        <a href="shop.php" class="btn-accent-arrow">View all products <i
-                                class="icon icon-ns-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+					<div class="btn-wrap align-right mt-4">
+						<a href="shop.php" class="btn-accent-arrow">View all products <i
+								class="icon icon-ns-arrow-right"></i></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 	<section id="best-selling" class="leaf-pattern-overlay">
 		<div class="corner-pattern-overlay"></div>
 		<div class="container">
