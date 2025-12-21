@@ -1,5 +1,8 @@
 <?php
+session_start();
 include 'database.php';
+include 'auth.php';
+
 $db = new Database();   
 
 // ================ 1. FEATURED BOOKS ================
@@ -52,6 +55,20 @@ $total_pages = ceil($total_books / $limit);
 
 // ================ 4. LẤY DANH SÁCH THỂ LOẠI ================
 $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
+
+// ================ 5. LẤY BÀI VIẾT BLOG ================
+$posts = $db->select("SELECT * FROM posts ORDER BY published_at DESC LIMIT 3");
+
+// ================ 6. TÍNH GIỎ HÀNG ================
+$cart_count = 0;
+$cart_total = 0;
+
+if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $item) {
+        $cart_count += $item['quantity'];
+        $cart_total += $item['price'] * $item['quantity'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -105,10 +122,13 @@ $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
 					</div>
 					<div class="col-md-6">
 						<div class="right-element">
-							<a href="#" class="user-account for-buy"><i
-									class="icon icon-user"></i><span>Account</span></a>
-							<a href="#" class="cart for-buy"><i class="icon icon-clipboard"></i><span>Cart:(0
-									$)</span></a>
+						<?php if (Auth::isLoggedIn()): ?>
+							<a href="cart_view.php" class="cart for-buy"><i class="icon icon-clipboard"></i><span>Cart:(<?= $cart_count ?> - $<?= number_format($cart_total, 2) ?>)</span></a>
+							<a href="javascript:void(0)" onclick="logout()" class="user-account for-buy"><i class="icon icon-user"></i><span>Đăng Xuất</span></a>
+						<?php else: ?>
+							<a href="login.php" class="user-account for-buy"><i class="icon icon-user"></i><span>Đăng Nhập</span></a>
+							<a href="cart_view.php" class="cart for-buy"><i class="icon icon-clipboard"></i><span>Cart:(<?= $cart_count ?> - $0.00)</span></a>
+						<?php endif; ?>
 
 							<div class="action-menu">
 
@@ -262,13 +282,13 @@ $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
 
 					<div class="product-list" data-aos="fade-up">
 						<div class="row">
-							<?php foreach ($books as $book) { ?>
-								<div class="col-md-3 mb-4">
+							<?php foreach ($featured_books as $book) { ?>
+				<div class="col-md-3 mb-4">
 									<div class="product-item">
 										<figure class="product-style">
 											<img src="./images/<?= htmlspecialchars($book["cover_image"]) ?>.jpg"
 												alt="Books" class="product-item">
-											<form action="cart.php" method="post">
+											<form action="cart.php" method="post" style="display: inline;">
 												<input type="hidden" name="book_id"
 													value="<?= htmlspecialchars($book['id']) ?>">
 												<button type="submit" name="add_to_cart" class="add-to-cart">
@@ -307,9 +327,15 @@ $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
 			<div class="row justify-content-center">
 				<div class="col-md-8">
 					<div class="row">
+						<?php 
+						// Lấy sách bán chạy nhất
+						$bestseller = $db->select("SELECT b.*, a.name AS author_name FROM books b JOIN authors a ON b.author_id = a.id WHERE b.bestseller = 1 LIMIT 1");
+						if (!empty($bestseller)) {
+							$best = $bestseller[0];
+						?>
 						<div class="col-md-6">
 							<figure class="products-thumb">
-								<img src="images/single-image.jpg" alt="book" class="single-image">
+								<img src="./images/<?= htmlspecialchars($best['cover_image']) ?>.jpg" alt="book" class="single-image">
 							</figure>
 						</div>
 
@@ -318,18 +344,22 @@ $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
 								<h2 class="section-title divider">Best Selling Book</h2>
 
 								<div class="products-content">
-									<div class="author-name">By Timbur Hood</div>
-									<h3 class="item-title">Birds gonna be happy</h3>
-									<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu feugiat amet,
-										libero ipsum enim pharetra hac.</p>
-									<div class="item-price">$ 45.00</div>
+									<div class="author-name">By <?= htmlspecialchars($best['author_name']) ?></div>
+									<h3 class="item-title"><?= htmlspecialchars($best['title']) ?></h3>
+									<p><?= htmlspecialchars(substr($best['description'], 0, 150)) ?>...</p>
+									<div class="item-price">$ <?= number_format($best['price'], 2) ?></div>
 									<div class="btn-wrap">
-										<a href="#" class="btn-accent-arrow">shop it now <i
-												class="icon icon-ns-arrow-right"></i></a>
+										<form action="cart.php" method="post" style="display: inline;">
+											<input type="hidden" name="book_id" value="<?= htmlspecialchars($best['id']) ?>">
+											<button type="submit" name="add_to_cart" class="btn-accent-arrow" style="background: none; border: none; cursor: pointer; color: inherit;">
+												shop it now <i class="icon icon-ns-arrow-right"></i>
+											</button>
+										</form>
 									</div>
 								</div>
 							</div>
 						</div>
+						<?php } ?>
 					</div>
 					<!-- / row -->
 				</div>
@@ -413,78 +443,31 @@ $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
 				<div class="inner-content">
 					<div class="product-list" data-aos="fade-up">
 						<div class="grid product-grid">
+							<?php 
+							// Lấy sách có discount
+							$discount_books = $db->select("SELECT b.*, a.name AS author_name FROM books b JOIN authors a ON b.author_id = a.id WHERE b.on_sale = 1 LIMIT 5");
+							foreach ($discount_books as $book):
+							?>
 							<div class="product-item">
 								<figure class="product-style">
-									<img src="images/product-item5.jpg" alt="Books" class="product-item">
-									<button type="button" class="add-to-cart" data-product-tile="add-to-cart">Add to
-										Cart</button>
+									<img src="./images/<?= htmlspecialchars($book['cover_image']) ?>.jpg" alt="Books" class="product-item">
+									<form action="cart.php" method="post" style="display: inline;">
+										<input type="hidden" name="book_id" value="<?= htmlspecialchars($book['id']) ?>">
+										<button type="submit" name="add_to_cart" class="add-to-cart">Add to Cart</button>
+									</form>
 								</figure>
 								<figcaption>
-									<h3>Simple way of piece life</h3>
-									<span>Armor Ramsey</span>
+									<h3><?= htmlspecialchars($book['title']) ?></h3>
+									<span><?= htmlspecialchars($book['author_name']) ?></span>
 									<div class="item-price">
-										<span class="prev-price">$ 50.00</span>$ 40.00
+										<?php if ($book['old_price'] > 0): ?>
+											<span class="prev-price">$ <?= number_format($book['old_price'], 2) ?></span>
+										<?php endif; ?>
+										$ <?= number_format($book['price'], 2) ?>
 									</div>
-							</div>
-							</figcaption>
-
-							<div class="product-item">
-								<figure class="product-style">
-									<img src="images/product-item6.jpg" alt="Books" class="product-item">
-									<button type="button" class="add-to-cart" data-product-tile="add-to-cart">Add to
-										Cart</button>
-								</figure>
-								<figcaption>
-									<h3>Great travel at desert</h3>
-									<span>Sanchit Howdy</span>
-									<div class="item-price">
-										<span class="prev-price">$ 30.00</span>$ 38.00
-									</div>
-							</div>
-							</figcaption>
-
-							<div class="product-item">
-								<figure class="product-style">
-									<img src="images/product-item7.jpg" alt="Books" class="product-item">
-									<button type="button" class="add-to-cart" data-product-tile="add-to-cart">Add to
-										Cart</button>
-								</figure>
-								<figcaption>
-									<h3>The lady beauty Scarlett</h3>
-									<span>Arthur Doyle</span>
-									<div class="item-price">
-										<span class="prev-price">$ 35.00</span>$ 45.00
-									</div>
-							</div>
-							</figcaption>
-
-							<div class="product-item">
-								<figure class="product-style">
-									<img src="images/product-item8.jpg" alt="Books" class="product-item">
-									<button type="button" class="add-to-cart" data-product-tile="add-to-cart">Add to
-										Cart</button>
-								</figure>
-								<figcaption>
-									<h3>Once upon a time</h3>
-									<span>Klien Marry</span>
-									<div class="item-price">
-										<span class="prev-price">$ 25.00</span>$ 35.00
-									</div>
-							</div>
-							</figcaption>
-
-							<div class="product-item">
-								<figure class="product-style">
-									<img src="images/product-item2.jpg" alt="Books" class="product-item">
-									<button type="button" class="add-to-cart" data-product-tile="add-to-cart">Add to
-										Cart</button>
-								</figure>
-								<figcaption>
-									<h3>Simple way of piece life</h3>
-									<span>Armor Ramsey</span>
-									<div class="item-price">$ 40.00</div>
 								</figcaption>
 							</div>
+							<?php endforeach; ?>
 						</div><!--grid-->
 					</div>
 				</div><!--inner-content-->
@@ -542,20 +525,20 @@ $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
 					</div>
 
 					<div class="row">
-
+						<?php foreach ($posts as $post): ?>
 						<div class="col-md-4">
 
 							<article class="column" data-aos="fade-up">
 
 								<figure>
 									<a href="#" class="image-hvr-effect">
-										<img src="images/post-img1.jpg" alt="post" class="post-image">
+										<img src="images/<?= htmlspecialchars($post['featured_image']) ?>" alt="post" class="post-image">
 									</a>
 								</figure>
 
 								<div class="post-item">
-									<div class="meta-date">Mar 30, 2021</div>
-									<h3><a href="#">Reading books always makes the moments happy</a></h3>
+									<div class="meta-date"><?= date('M d, Y', strtotime($post['published_at'])) ?></div>
+									<h3><a href="#"><?= htmlspecialchars($post['title']) ?></a></h3>
 
 									<div class="links-element">
 										<div class="categories">inspiration</div>
@@ -578,72 +561,7 @@ $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
 							</article>
 
 						</div>
-						<div class="col-md-4">
-
-							<article class="column" data-aos="fade-up" data-aos-delay="200">
-								<figure>
-									<a href="#" class="image-hvr-effect">
-										<img src="images/post-img2.jpg" alt="post" class="post-image">
-									</a>
-								</figure>
-								<div class="post-item">
-									<div class="meta-date">Mar 29, 2021</div>
-									<h3><a href="#">Reading books always makes the moments happy</a></h3>
-
-									<div class="links-element">
-										<div class="categories">inspiration</div>
-										<div class="social-links">
-											<ul>
-												<li>
-													<a href="#"><i class="icon icon-facebook"></i></a>
-												</li>
-												<li>
-													<a href="#"><i class="icon icon-twitter"></i></a>
-												</li>
-												<li>
-													<a href="#"><i class="icon icon-behance-square"></i></a>
-												</li>
-											</ul>
-										</div>
-									</div><!--links-element-->
-
-								</div>
-							</article>
-
-						</div>
-						<div class="col-md-4">
-
-							<article class="column" data-aos="fade-up" data-aos-delay="400">
-								<figure>
-									<a href="#" class="image-hvr-effect">
-										<img src="images/post-img3.jpg" alt="post" class="post-image">
-									</a>
-								</figure>
-								<div class="post-item">
-									<div class="meta-date">Feb 27, 2021</div>
-									<h3><a href="#">Reading books always makes the moments happy</a></h3>
-
-									<div class="links-element">
-										<div class="categories">inspiration</div>
-										<div class="social-links">
-											<ul>
-												<li>
-													<a href="#"><i class="icon icon-facebook"></i></a>
-												</li>
-												<li>
-													<a href="#"><i class="icon icon-twitter"></i></a>
-												</li>
-												<li>
-													<a href="#"><i class="icon icon-behance-square"></i></a>
-												</li>
-											</ul>
-										</div>
-									</div><!--links-element-->
-
-								</div>
-							</article>
-
-						</div>
+						<?php endforeach; ?>
 
 					</div>
 
@@ -852,6 +770,43 @@ $categories = $db->select("SELECT name, slug FROM categories ORDER BY name");
 		crossorigin="anonymous"></script>
 	<script src="js/plugins.js"></script>
 	<script src="js/script.js"></script>
+	
+	<script>
+	// Xử lý đăng xuất
+	function logout() {
+		if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+			fetch('auth.php', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				body: 'action=logout'
+			}).then(() => {
+				window.location.href = 'index.php';
+			});
+		}
+	}
+	
+	// Cập nhật giỏ hàng sau khi thêm sản phẩm
+	document.querySelectorAll('form[action="cart.php"] button[name="add_to_cart"]').forEach(btn => {
+		btn.addEventListener('click', (e) => {
+			e.preventDefault();
+			const form = btn.closest('form');
+			const formData = new FormData(form);
+			formData.append('add_to_cart', true);
+			
+			fetch('cart.php', {
+				method: 'POST',
+				body: formData
+			}).then(response => response.json())
+			.then(data => {
+				alert(data.message);
+				// Cập nhật số lượng giỏ hàng
+				location.reload();
+			});
+		});
+	});
+	</script>
 
 </body>
 
