@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3307
--- Thời gian đã tạo: Th12 01, 2025 lúc 08:58 AM
+-- Thời gian đã tạo: Th12 25, 2025 lúc 01:26 PM
 -- Phiên bản máy phục vụ: 10.4.13-MariaDB
 -- Phiên bản PHP: 7.3.21
 
@@ -94,14 +94,14 @@ CREATE TABLE IF NOT EXISTS `books` (
 --
 
 INSERT INTO `books` (`id`, `title`, `slug`, `author_id`, `category_id`, `description`, `price`, `old_price`, `isbn`, `pages`, `publication_year`, `cover_image`, `featured`, `bestseller`, `on_sale`, `stock`, `created_at`, `updated_at`) VALUES
-(1, 'Simple way of piece life', 'simple-way-of-piece-life', 1, 6, 'Cuốn sách giúp bạn tìm thấy sự bình yên trong cuộc sống hiện đại.', '40.00', '50.00', NULL, NULL, NULL, 'product-item1', 1, 0, 1, 99, '2025-12-01 08:50:51', '2025-12-01 08:50:51'),
-(2, 'Great travel at desert', 'great-travel-at-desert', 2, 4, 'Hành trình kỳ thú qua sa mạc Sahara.', '38.00', '30.00', NULL, NULL, NULL, 'product-item2.jpg', 1, 0, 1, 99, '2025-12-01 08:50:51', '2025-12-01 08:50:51'),
-(3, 'The lady beauty Scarlett', 'the-lady-beauty-scarlett', 3, 3, 'Câu chuyện tình yêu bất hủ.', '45.00', '35.00', NULL, NULL, NULL, 'product-item3.jpg', 1, 0, 1, 99, '2025-12-01 08:50:51', '2025-12-01 08:50:51'),
-(4, 'Once upon a time', 'once-upon-a-time', 4, 5, 'Cổ tích dành cho người lớn.', '35.00', '25.00', NULL, NULL, NULL, 'product-item4.jpg', 1, 0, 1, 99, '2025-12-01 08:50:51', '2025-12-01 08:50:51'),
-(5, 'Birds gonna be happy', 'birds-gonna-be-happy', 5, 8, 'Cuốn sách bán chạy nhất về hạnh phúc.', '45.00', NULL, NULL, NULL, NULL, 'single-image.jpg', 0, 1, 0, 99, '2025-12-01 08:50:51', '2025-12-01 08:50:51'),
-(6, 'Portrait photography', 'portrait-photography', 6, 7, 'Học chụp chân dung chuyên nghiệp.', '40.00', NULL, NULL, NULL, NULL, 'tab-item1.jpg', 0, 0, 0, 99, '2025-12-01 08:50:51', '2025-12-01 08:50:51'),
-(7, 'Tips of simple lifestyle', 'tips-of-simple-lifestyle', 7, 6, '100 mẹo sống tối giản hiệu quả.', '40.00', NULL, NULL, NULL, NULL, 'tab-item3.jpg', 0, 0, 0, 99, '2025-12-01 08:50:51', '2025-12-01 08:50:51'),
-(8, 'Peaceful Enlightment', 'peaceful-enlightment', 9, 8, 'Con đường đến giác ngộ.', '40.00', NULL, NULL, NULL, NULL, 'tab-item5.jpg', 0, 0, 0, 99, '2025-12-01 08:50:51', '2025-12-01 08:50:51');
+(1, 'Simple way of piece life', 'simple-way-of-piece-life', 1, 6, 'Cuốn sách giúp bạn tìm thấy sự bình yên trong cuộc sống hiện đại.', '40.00', '50.00', NULL, NULL, NULL, 'product-item1', 1, 0, 1, 99, '2025-12-01 08:50:51', '2025-12-01 09:09:07'),
+(2, 'Great travel at desert', 'great-travel-at-desert', 2, 4, 'Hành trình kỳ thú qua sa mạc Sahara.', '38.00', '30.00', NULL, NULL, NULL, 'product-item2', 1, 0, 1, 99, '2025-12-01 08:50:51', '2025-12-01 09:55:24'),
+(3, 'The lady beauty Scarlett', 'the-lady-beauty-scarlett', 3, 3, 'Câu chuyện tình yêu bất hủ.', '45.00', '35.00', NULL, NULL, NULL, 'product-item3', 1, 0, 1, 99, '2025-12-01 08:50:51', '2025-12-01 09:55:28'),
+(4, 'Once upon a time', 'once-upon-a-time', 4, 5, 'Cổ tích dành cho người lớn.', '35.00', '25.00', NULL, NULL, NULL, 'product-item4', 1, 0, 1, 99, '2025-12-01 08:50:51', '2025-12-01 09:55:31'),
+(5, 'Birds gonna be happy', 'birds-gonna-be-happy', 5, 8, 'Cuốn sách bán chạy nhất về hạnh phúc.', '45.00', NULL, NULL, NULL, NULL, 'single-image', 1, 1, 0, 99, '2025-12-01 08:50:51', '2025-12-01 09:55:35'),
+(6, 'Portrait photography', 'portrait-photography', 6, 7, 'Học chụp chân dung chuyên nghiệp.', '40.00', NULL, NULL, NULL, NULL, 'tab-item1', 1, 0, 0, 99, '2025-12-01 08:50:51', '2025-12-01 09:55:39'),
+(7, 'Tips of simple lifestyle', 'tips-of-simple-lifestyle', 7, 6, '100 mẹo sống tối giản hiệu quả.', '40.00', NULL, NULL, NULL, NULL, 'tab-item3', 1, 0, 0, 99, '2025-12-01 08:50:51', '2025-12-01 09:55:44'),
+(8, 'Peaceful Enlightment', 'peaceful-enlightment', 9, 8, 'Con đường đến giác ngộ.', '40.00', NULL, NULL, NULL, NULL, 'tab-item5', 1, 0, 0, 99, '2025-12-01 08:50:51', '2025-12-01 09:55:49');
 
 -- --------------------------------------------------------
 
@@ -151,7 +151,15 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `customers`
+--
+
+INSERT INTO `customers` (`id`, `name`, `email`, `phone`, `address`, `password_hash`, `created_at`) VALUES
+(1, 'aa', 'aa@gmail.com', NULL, NULL, '$2y$10$kD0aQxfqF2ag64xNWrGfzOTZpqztwS5JyE61AmbHIXm3f5GSnPIFC', '2025-12-25 13:17:33'),
+(2, 'aaaaa', 'bb@gmail.com', NULL, NULL, '$2y$10$21QWC8qd60kewg4UEWFYA.0f3Vpw0qSwA1ClJcjtcpa7H.MQ7tAH.', '2025-12-25 13:18:04');
 
 -- --------------------------------------------------------
 
@@ -221,6 +229,31 @@ INSERT INTO `posts` (`id`, `title`, `slug`, `content`, `excerpt`, `featured_imag
 (1, 'Reading books always makes the moments happy', 'reading-books-makes-happy', NULL, 'Đọc sách không chỉ mang lại kiến thức mà còn là niềm vui bất tận...', 'post-img1.jpg', 'Admin', '2021-03-30', '2025-12-01 08:50:51'),
 (2, '10 cuốn sách thay đổi cuộc đời tôi', '10-books-changed-my-life', NULL, 'Danh sách những cuốn sách đã định hình tư duy của tôi...', 'post-img2.jpg', 'Admin', '2021-03-29', '2025-12-01 08:50:51'),
 (3, 'Tại sao nên đọc sách giấy thay vì ebook?', 'paper-vs-ebook', NULL, 'Dùy chọn nào tốt hơn cho sức khỏe và trải nghiệm đọc?', 'post-img3.jpg', 'Admin', '2021-02-27', '2025-12-01 08:50:51');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT 'admin',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
+(1, 'Super Admin', 'admin@booksaw.com', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'admin', '2025-12-25 13:25:27');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
