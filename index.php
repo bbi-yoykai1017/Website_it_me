@@ -15,30 +15,64 @@ $featured_books = $db->select("
     LIMIT 4
 ");
 
-// ================ 2. POPULAR BOOKS + PHÂN TRANG ================
-$limit    = 4;
+// ================ 2. POPULAR BOOKS + TÌM KIẾM + PHÂN TRANG ================
+$limit    = 4; // Số sách hiển thị mỗi trang
 $page     = max(1, (int)($_GET['page'] ?? 1));
 $category = $_GET['cat'] ?? 'all';
+$search   = trim($_GET['search'] ?? ''); // Lấy từ khóa tìm kiếm
 $offset   = ($page - 1) * $limit;
 
+// -- Câu truy vấn lấy sách --
 $sql2 = "SELECT b.*, a.name AS author_name, c.name AS cat_name, c.slug AS cat_slug
          FROM books b
          JOIN authors a ON b.author_id = a.id
-         JOIN categories c ON b.category_id = c.id";
+         JOIN categories c ON b.category_id = c.id
+         WHERE 1=1"; // Kỹ thuật WHERE 1=1 để dễ nối chuỗi AND
 
 $params = [];
 
+// 1. Lọc theo danh mục
 if ($category !== 'all') {
-    $sql2 .= " WHERE c.slug = ?";
+    $sql2 .= " AND c.slug = ?";
     $params[] = $category;
 }
 
+// 2. Lọc theo từ khóa tìm kiếm (MỚI)
+if (!empty($search)) {
+    $sql2 .= " AND (b.title LIKE ? OR a.name LIKE ?)";
+    $params[] = "%$search%"; // Tìm kiếm tương đối theo tên sách
+    $params[] = "%$search%"; // Tìm kiếm tương đối theo tên tác giả
+}
+
+// Thêm sắp xếp và giới hạn phân trang
 $sql2 .= " ORDER BY b.id DESC LIMIT ? OFFSET ?";
 $params[] = $limit;
 $params[] = $offset;
 
-// Lấy danh sách sách theo trang + thể loại
-$books = $db->select($sql2, $params);   
+// Thực thi lấy sách
+$books = $db->select($sql2, $params);
+
+// ================ 3. ĐẾM TỔNG SỐ SÁCH (Cập nhật cho tìm kiếm) ================
+$countSql = "SELECT COUNT(*) FROM books b 
+             JOIN authors a ON b.author_id = a.id
+             JOIN categories c ON b.category_id = c.id
+             WHERE 1=1";
+$countParams = [];
+
+if ($category !== 'all') {
+    $countSql .= " AND c.slug = ?";
+    $countParams[] = $category;
+}
+
+if (!empty($search)) {
+    $countSql .= " AND (b.title LIKE ? OR a.name LIKE ?)";
+    $countParams[] = "%$search%";
+    $countParams[] = "%$search%";
+}
+
+$total_result = $db->select($countSql, $countParams);
+$total_books = $total_result[0]['COUNT(*)'] ?? 0;
+$total_pages = ceil($total_books / $limit);
 
 // ================ 3. ĐẾM TỔNG SỐ SÁCH (cho phân trang) ================
 $countSql = "SELECT COUNT(*) FROM books b JOIN categories c ON b.category_id = c.id";
@@ -136,9 +170,9 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 									<a href="#" class="search-button search-toggle" data-selector="#header-wrap">
 										<i class="icon icon-search"></i>
 									</a>
-									<form role="search" method="get" class="search-box">
-										<input class="search-field text search-input" placeholder="Search"
-											type="search">
+									<form role="search" method="get" class="search-box" action="search.php">
+										<input class="search-field text search-input" placeholder="Tìm kiếm sách..."
+											type="search" name="q">
 									</form>
 								</div>
 							</div>
@@ -168,6 +202,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 
 										<ul>
 											<li class="active"><a href="index.php">Home</a></li>
+											<li><a href="search.php">Tìm Kiếm Sách</a></li>
 											<li><a href="index.php">About</a></li>
 											<li><a href="index.php">Styles</a></li>
 											<li><a href="index.php">Blog</a></li>
@@ -179,7 +214,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 										</ul>
 									</li>
 									<li class="menu-item"><a href="#featured-books" class="nav-link">Featured</a></li>
-									<li class="menu-item"><a href="#popular-books" class="nav-link">Popular</a></li>
+									<li class="menu-item"><a href="search.php" class="nav-link">Tìm Kiếm</a></li>
 									<li class="menu-item"><a href="#special-offer" class="nav-link">Offer</a></li>
 									<li class="menu-item"><a href="#latest-blog" class="nav-link">Articles</a></li>
 									<li class="menu-item"><a href="#download-app" class="nav-link">Download App</a></li>
@@ -251,6 +286,45 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 			</div>
 		</div>
 
+	</section>
+
+	<!-- SEARCH SECTION -->
+	<section id="search-section" class="py-5" style="background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-md-10">
+					<div style="text-align: center; margin-bottom: 30px;">
+						<h2 style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">Tìm Kiếm Sách Yêu Thích</h2>
+						<p style="font-size: 16px; color: #666;">Khám phá hàng nghìn cuốn sách từ các tác giả nổi tiếng</p>
+					</div>
+
+					<form method="get" action="search.php" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+						<div class="row g-3">
+							<div class="col-md-6">
+								<input type="text" name="q" class="form-control" placeholder="🔍 Nhập tên sách hoặc tác giả..." style="padding: 12px; font-size: 14px; border: 2px solid #eee; border-radius: 5px;">
+							</div>
+							<div class="col-md-3">
+								<select name="category" class="form-control" style="padding: 12px; font-size: 14px; border: 2px solid #eee; border-radius: 5px;">
+									<option value="all">Tất Cả Danh Mục</option>
+									<?php foreach ($categories as $cat): ?>
+										<option value="<?= $cat['slug'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<div class="col-md-3">
+								<button type="submit" class="btn btn-dark w-100" style="padding: 12px; font-size: 14px; border-radius: 5px;">
+									<i class="icon icon-search"></i> Tìm Kiếm
+								</button>
+							</div>
+						</div>
+					</form>
+
+					<div style="text-align: center; margin-top: 20px;">
+						<p style="color: #999; font-size: 13px;">💡 Mẹo: Sử dụng <a href="search.php" style="color: #000; font-weight: bold;">trang tìm kiếm nâng cao</a> để lọc theo tác giả, giá tiền, v.v.</p>
+					</div>
+				</div>
+			</div>
+		</div>
 	</section>
 
 	<section id="client-holder" data-aos="fade-up">
@@ -770,6 +844,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 		crossorigin="anonymous"></script>
 	<script src="js/plugins.js"></script>
 	<script src="js/script.js"></script>
+	<script src="js/search.js"></script>
 	
 	<script>
 	// Xử lý đăng xuất
